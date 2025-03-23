@@ -83,7 +83,7 @@ refreshBtn.addEventListener("click", () => {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register("/sw.js")
+      .register("/sw.js") // Assurez-vous que ce chemin est correct
       .then((registration) => {
         console.log("Service Worker registered with scope:", registration.scope);
       })
