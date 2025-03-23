@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # Ajout de flask_cors
 from leaf_analysis import analyze_leaf
 import os
 
 app = Flask(__name__, static_folder='static')
+CORS(app)  # Active CORS pour éviter l'erreur "Failed to fetch"
 
 @app.route('/')
 def serve_index():
@@ -31,4 +33,5 @@ def upload_file():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Définit le port dynamique pour Render
+    app.run(host='0.0.0.0', port=port, debug=True)  # Autorise l'accès externe
