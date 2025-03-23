@@ -4,7 +4,7 @@ const refreshBtn = document.getElementById("refresh-btn");
 const resultDiv = document.getElementById("result");
 let selectedFile = null;
 
-// Prévisualisation immédiate pour vérifier le fichier sélectionné
+// PrÃ©visualisation immÃ©diate pour vÃ©rifier le fichier sÃ©lectionnÃ©
 fileInput.addEventListener("change", (e) => {
   selectedFile = e.target.files[0];
   console.log("Selected File:", selectedFile);
@@ -56,10 +56,10 @@ analyzeBtn.addEventListener("click", async (e) => {
     if (data.error) {
       resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
     } else {
-      // Extraction de la valeur numérique seule (ex. "23.09%") sans texte supplémentaire
+      // Extraction de la valeur numÃ©rique seule (ex. "23.09%") sans texte supplÃ©mentaire
       const severityValue = data.severity ? data.severity.split(" ")[0] : "Not available";
 
-      // Affichage uniquement de la sévérité
+      // Affichage uniquement de la sÃ©vÃ©ritÃ©
       resultDiv.innerHTML = `
         <h2>Infection Severity: ${severityValue}</h2>
       `;
@@ -70,7 +70,7 @@ analyzeBtn.addEventListener("click", async (e) => {
   }
 });
 
-// Gestion du bouton de réinitialisation
+// Gestion du bouton de rÃ©initialisation
 refreshBtn.addEventListener("click", () => {
   fileInput.value = "";
   selectedFile = null;
