@@ -3,18 +3,25 @@ const analyzeBtn = document.getElementById("analyze-btn");
 const refreshBtn = document.getElementById("refresh-btn");
 const resultDiv = document.getElementById("result");
 let selectedFile = null;
+const API_URL = "https://tonserveur.com/upload"; // Remplace par l'URL de ton backend
 
-// Prévisualisation immédiate pour vérifier le fichier sélectionné
 fileInput.addEventListener("change", (e) => {
   selectedFile = e.target.files[0];
-  console.log("Selected File:", selectedFile);
   analyzeBtn.disabled = !selectedFile;
 
   if (selectedFile) {
+    // Vérification du type de fichier
+    if (!selectedFile.type.startsWith("image/")) {
+      resultDiv.innerHTML = "<p class='error'>Please select a valid image file.</p>";
+      fileInput.value = "";
+      selectedFile = null;
+      analyzeBtn.disabled = true;
+      return;
+    }
+
     const previewUrl = URL.createObjectURL(selectedFile);
-    console.log("Preview URL:", previewUrl);
     resultDiv.innerHTML = `
-      <p><span style="font-weight: bold; color: red;">Selected File:</span> ${selectedFile.name}</p>
+      <p><strong style="color: red;">Selected File:</strong> ${selectedFile.name}</p>
       <img src="${previewUrl}" alt="Preview" style="max-width: 200px;">
     `;
   } else {
@@ -22,14 +29,15 @@ fileInput.addEventListener("change", (e) => {
   }
 });
 
-// Gestion du clic sur le bouton d'analyse
 analyzeBtn.addEventListener("click", async (e) => {
   e.preventDefault();
-  console.log("Analyze Image Button Clicked");
-
   if (!selectedFile) {
-    console.log("No file selected for analysis");
     resultDiv.innerHTML = "<p class='error'>Please select a file</p>";
+    return;
+  }
+
+  if (!navigator.onLine) {
+    resultDiv.innerHTML = "<p class='error'>No internet connection.</p>";
     return;
   }
 
@@ -38,31 +46,25 @@ analyzeBtn.addEventListener("click", async (e) => {
   resultDiv.innerHTML = "<p>Processing...</p>";
 
   try {
-    console.log("Sending POST request to /upload");
-    const response = await fetch("/upload", {
+    const response = await fetch(API_URL, {
       method: "POST",
-      body: formData
+      body: formData,
+      headers: {
+        // Désactiver cette ligne si CORS bloque l'accès
+        // "Content-Type": "multipart/form-data" 
+      }
     });
-
-    console.log("Response received, status:", response.status);
 
     if (!response.ok) {
       throw new Error(`HTTP Error! Status: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("Server response:", data);
-
     if (data.error) {
       resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
     } else {
-      // Extraction de la valeur numérique seule (ex. "23.09%") sans texte supplémentaire
       const severityValue = data.severity ? data.severity.split(" ")[0] : "Not available";
-
-      // Affichage uniquement de la sévérité
-      resultDiv.innerHTML = `
-        <h2>Infection Severity: ${severityValue}</h2>
-      `;
+      resultDiv.innerHTML = `<h2>Infection Severity: ${severityValue}</h2>`;
     }
   } catch (error) {
     resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
@@ -70,20 +72,17 @@ analyzeBtn.addEventListener("click", async (e) => {
   }
 });
 
-// Gestion du bouton de réinitialisation
 refreshBtn.addEventListener("click", () => {
   fileInput.value = "";
   selectedFile = null;
   analyzeBtn.disabled = true;
   resultDiv.innerHTML = "";
-  console.log("Results reset");
 });
 
-// Enregistrement du service worker (optionnel)
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register("/sw.js") // Assurez-vous que ce chemin est correct
+      .register("/sw.js")
       .then((registration) => {
         console.log("Service Worker registered with scope:", registration.scope);
       })
